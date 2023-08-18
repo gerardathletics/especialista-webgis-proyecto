@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+    <title>ODS - Brasil</title>
+    <link rel="icon" href="./assets/BrasilODS.png" type="image/png">
+    <!-- Leaflet -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+    <!-- Estilos -->
+    <link rel="stylesheet" href="styles.css">
+
+    <!--Datos Geojson -->
+    <script src="./data/SlumsBH2010.geojson"></script>
+    <script src="./data/Slums_BH_2019.geojson"></script>
+    <script src="./data/Slums_SP_2019.geojson"></script>
+    <script src="./data/Slums_RJ_2019.geojson"></script>
+
+    <script src="./data/munis_rmbh.geojson"></script>
+    <script src="./data/munis_rmsp.geojson"></script>
+    <script src="./data/munis_rmrj.geojson"></script>
+
+    <script src="./data/RM_BeloHorizonte.geojson"></script>
+    <script src="./data/RM_SaoPaulo.geojson"></script>
+    <script src="./data/RM_RioJaneiro.geojson"></script>
+
+    <script src="./data/BR_UF.geojson"></script>
+    <script src="./data/BR_UF_Capitals.geojson"></script>
+
+</head>
+
+<body>
+    <div class="topbar">
+        <h1 class="topbar-header">Barrios Marginales y Crecimiento Urbano en Brasil</h1>
+        <div class="button-container">
+            <button class='map-button' onclick="changeMap(1)">Barrios marginales en regiones metropolitanas</button>
+            <button class="map-button" onclick="changeMap(2)">Barrios marginales por capital</button>
+            <button class="map-button" onclick="changeMap(3)">Indicadores (IBGE - WMS)</button>
+        </div>
+    </div>
+    <div id="select-container" class="select-container">
+        <select id="region" onchange="zoomToRegion()" class="region-dropdown">
+            <option value="">--Escoger región--</option>
+            <option value="rio">Rio de Janeiro</option>
+            <option value="sao_paulo">Sao Paulo</option>
+            <option value="belo_horizonte">Belo Horizonte</option>
+            <option value="initial">- Vista inicial -</option>
+        </select>
+    </div>
+
+    <div id="sidebar" class="sidebar collapsed">
+        <!-- Nav tabs -->
+        <div class="sidebar-tabs">
+            <ul role="tablist">
+                <li><a href="#home" role="tab"><img class="icon-image"
+                            src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/34/Home-icon.svg/1200px-Home-icon.svg.png"
+                            width="22" height="22"><i class="fa fa-bars"> </i></a></li>
+                <li><a href="#slums" role="tab"><i><img class="icon-image"
+                                src="https://cdn-icons-png.flaticon.com/512/7714/7714540.png" width="28"
+                                height="28"></i></a></li>
+                <li><a href="#builtup" role="tab"><i><img class="icon-image"
+                                src="https://cdn-icons-png.flaticon.com/512/230/230503.png" width="28"
+                                height="30"></i></a> </li>
+                <li><a href="https://github.com/gerardathletics" role="tab" target="_blank"><i><img class="icon-image"
+                                src="https://cdn4.iconfinder.com/data/icons/iconsimple-logotypes/512/github-512.png"
+                                width="28" height="26"></i></a></li>
+            </ul>
+        </div>
+
+        <!-- Tab panes -->
+        <div class="sidebar-content">
+            <div class="sidebar-pane" id="home">
+                <h1 class="sidebar-header">
+                    Introducción
+                    <span class="sidebar-close"><i class="fa fa-caret-left"></i></span>
+                </h1>
+                <p class="introtext">Este mapa es parte del proyecto final del curso Especialista en Desarrollo Web-GIS.
+                    Los resultados y datos utilizados se basan en la tesis de Máster titulada "Slums and Urban Land
+                    Consumption in Brazilian Metropolitan Areas: Monitoring SDG Indicators 11.1.1 and 11.3.1 Using Open
+                    Data", realizada por el presente estudiante para el Master en Geo-Information Science en la
+                    Wageningen University & Research.
+                </p>
+
+                <p class="introtext"> ---<b>Gerard Mateu Porras Cantons</b></p>
+
+                <img src="./assets/3dPopBrasil.png" width="100%" height="100%">
+                <figcaption class="fig-caption">Representación 3D de la distribución de la población en Brasil
+                </figcaption>
+
+
+                <p class="introtext"> <b>Resumen</b></p>
+
+                <p class="lorem">La rápida e incontrolada expansión urbana y el crecimiento de la población pueden
+                    provocar problemas medioambientales y sociales, siendo la formación de barrios marginales uno de
+                    ellos. En relación con este tema, las Naciones Unidas establecieron varios objetivos y metas
+                    (Objetivos de Desarrollo Sostenible) que pretenden garantizar la calidad de vida y actuar a favor de
+                    la sostenibilidad. Estos objetivos se miden mediante indicadores y dos de ellos directamente
+                    relacionados con esta cuestión urbana son 11.1.1: porcentaje de población que vive en barrios
+                    marginales; y 11.3.1: relación entre la tasa de consumo de suelo y la tasa de crecimiento de la
+                    población. En este estudio, estos indicadores se calcularon utilizando conjuntos de datos abiertos
+                    en tres regiones metropolitanas de Brasil, un país que experimentó un rápido crecimiento urbano
+                    durante las últimas décadas y cuyos barrios marginales son especialmente conocidos.</p>
+                <p class="lorem">Además, se calculó la relación entre la tasa de consumo de suelo y la tasa de
+                    crecimiento de la población en las favelas como método para comprender la dinámica urbano-social de
+                    dichas entidades. En el estudio, se observó que el crecimiento de la población prevalecía sobre la
+                    expansión espacial en las tres regiones metropolitanas, y era aún más prevalente en las chabolas.
+                    Esto indicaba un uso eficiente del suelo, pero podía venir acompañado de una sobredensificación.
+                    Esto último podría confirmarse con el estudio de los barrios marginales, donde en el periodo
+                    2010-2019 los barrios marginales aumentaron en número, población y superficie. Esta información
+                    puede ayudar a comprender mejor la dinámica urbana de los asentamientos chabolistas con el fin de
+                    proporcionar políticas eficaces y sostenibles.</p>
+            </div>
+            <div class="sidebar-pane" id="slums">
+                <h1 class="sidebar-header">
+                    Barrios Marginales - ODS 11.1.1
+                    <span class="sidebar-close"><i class="fa fa-caret-left"></i></span>
+                </h1>
+                <p class="lorem">
+                    El <strong>Instituto Brasileño de Geografía y Estadística (IBGE)</strong> y la Secretaría Especial
+                    de Articulación Social, en colaboración con otras instituciones, son responsables de monitorizar el
+                    estado y la evolución de los ODS en Brasil. En este sentido, los <strong>barrios marginales</strong>
+                    son un fenómeno conocido en Brasil, especialmente las favelas en Río de Janeiro. Sin embargo, estos
+                    se distribuyen en todo el país.
+                </p>
+                <p class="lorem">
+                    La formación de barrios marginales y el proceso de urbanización están estrechamente relacionados.
+                    Ambos indicadores se han estudiado independientemente, pero hasta ahora, no hay estudios que
+                    vinculen los barrios marginales y la tasa de consumo de tierras en relación con la tasa de
+                    crecimiento de la población.
+                </p>
+                <img src="./assets/SlumsPerStateAndCapital.png" width="100%" height="100%">
+                <figcaption class="fig-caption">Proporción de viviendas en barrios marginales en Brasil, por estado y
+                    capital
+                </figcaption>
+                <h3>Los Barrios Marginales en las mayores regiones metropolitanas</h3>
+                <p class="lorem">
+                    Los primeros hallazgos del estudio mostraron que Río de Janeiro era la región con más área cubierta
+                    por barrios marginales en ambos años estudiados, con poco más de 120 km². No obstante, fue la única
+                    área donde el total del área de los barrios marginales disminuyó, concretamente en un 2.1%. Al
+                    contrario, São Paulo fue la segunda región con más área de barrios marginales, el área aumentó en un
+                    37% en el periodo 2010-2019, obteniendo el crecimiento más sustancial.
+                </p>
+
+                <p class="lorem">
+                    Respecto a los resultados de la población, la región estudiada con el mayor número de habitantes
+                    viviendo en barrios marginales fue São Paulo, seguida de Río de Janeiro y Belo Horizonte. Belo
+                    Horizonte aumentó su población en barrios marginales en un 14.9% durante el periodo 2010-2019,
+                    mientras que en Río de Janeiro aumentó un 13.5% y en São Paulo un 21.7%.
+                </p>
+                <img src="./assets/trimap_perpopSlums2010.png" width="100%" height="100%">
+                <figcaption class="fig-caption">Proporción de población viviendo en barrios marginales en las mayores
+                    regiones metropolitanas</figcaption>
+
+                <p class="lorem">
+                    A nivel de municipio, los municipios con el mayor porcentaje de población viviendo en barrios
+                    marginales son las capitales de las regiones metropolitanas o los municipios circundantes. Desde
+                    2010 hasta 2019, algunos municipios redujeron o aumentaron su proporción de población viviendo en
+                    barrios marginales.
+                </p>
+                <img src="./assets/trimap3.png" width="100%" height="100%">
+                <figcaption class="fig-caption">Cambios en la proporción de población viviendo en barrios marginales en
+                    las mayores
+                    regiones metropolitanas entre 2010 y 2019</figcaption>
+            </div>
+            <div class="sidebar-pane" id="builtup">
+                <h1 class="sidebar-header">
+                    Crecimiento Urbano - ODS 11.3.1
+                    <span class="sidebar-close"><i class="fa fa-caret-left"></i></span>
+                </h1>
+                <p class="lorem">El indicador ODS 11.3.1 se centra en la <strong>proporción entre el ritmo de consumo de
+                        terrenos y el
+                        ritmo de crecimiento poblacional</strong> (RLC-PG) para alcanzar el objetivo 11.3; para 2030,
+                    mejorar la
+                    urbanización inclusiva y sostenible y la capacidad de planificación y gestión de asentamientos
+                    humanos participativa, integrada y sostenible en todos los países.</p>
+
+                <p class="lorem">El <strong>área construida</strong> aumentó en las tres áreas metropolitanas durante
+                    las últimas
+                    décadas. Durante el período estudiado (2000-2015), en términos porcentuales, Belo Horizonte tuvo el
+                    crecimiento más importante, aumentando un 9.5% su área construida. Las áreas construidas de Río de
+                    Janeiro y São Paulo crecieron menos intensamente con un 5.7% y 6.1% respectivamente.</p>
+
+                <img src="./assets/RMBHbuiltupSlower.gif" width="100%" height="100%">
+                <figcaption class="fig-caption">Crecimiento del área construida en las mayores regiones metropolitanas
+                </figcaption>
+
+
+                <p class="lorem">La <strong>población</strong> sigue siendo un aspecto fundamental a considerar ya que
+                    se decidió
+                    utilizar 4 conjuntos de datos diferentes y compararlos. Los resultados de RLC-PG variaron debido a
+                    la variable de población, ya que 3 de los cuatro conjuntos de datos utilizaron la misma área
+                    construida.</p>
+                <img src="./assets/popugiff1.gif" width="100%" height="100%">
+                <figcaption class="fig-caption">Representación 3D del crecimiento de la población en las mayores
+                    regiones metropolitanas</figcaption>
+
+                <p class="lorem">Los resultados obtenidos en los cálculos de RLC-PG indicaron diferencias entre los tres
+                    conjuntos de
+                    datos de población y las regiones. Considerándolo todo, se puede extraer una tendencia visible de
+                    los resultados: Belo Horizonte tuvo el mayor RLC-PG y LUE - métrica parecida a RLC-PG - (0.5 y
+                    0.09), Río de Janeiro se situó en
+                    el medio (0.42 y 0.08) y contrariamente, São Paulo obtuvo los valores más bajos en ambos indicadores
+                    (0.4 y 0.07).</p>
+
+                <p class="lorem">Un RLC-PG entre 0 y 1 significa que la tasa de crecimiento de la población prevalece
+                    sobre la
+                    expansión espacial, es decir, un uso más eficiente de la tierra pero podría implicar densificación.
+                    Este es el caso de las tres regiones metropolitanas. Sin embargo, cuanto más cerca de 1, más
+                    equilibradas son las tasas.</p>
+
+                <p class="lorem">Respecto a LUE, los valores positivos indican que la expansión construida fue más lenta
+                    que el
+                    crecimiento de la población. Sin embargo, se considera que los valores entre -0.03 y 0.03
+                    representan estabilidad entre las dos tasas, en otras palabras, la tasa de construcción y la tasa de
+                    crecimiento de la población aumentaron o disminuyeron de manera similar manteniendo el consumo de
+                    suelo per cápita.</p>
+            </div>
+        </div>
+    </div>
+
+
+    <link rel="stylesheet" href="leaflet-sidebar.css" />
+    <script src="leaflet-sidebar.js"></script>
+    <script src="https://code.jquery.com/jquery-3.2.1.js"></script>
+
+
+    <div id="map" class="map"></div>
+    <div id="map2" class="map hidden"></div>
+    <div id="map3" class="map hidden"></div>
+    <script src="main.js"></script>
+
+</body>
+
+</html>
